@@ -88,6 +88,7 @@ class _AnilistPageState extends State<AnilistPage> {
         backgroundColor: Colors.transparent,
         elevation: 5,
         title: Center(
+
           child: Text("Anime", style: GoogleFonts.exo2(color: Colors.white)),
         ),
         actions: [
@@ -98,8 +99,63 @@ class _AnilistPageState extends State<AnilistPage> {
               radius: 15,
             ),
           ),
-        ],
+        ),
       ),
+      body: GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(8),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 6,          
+          crossAxisSpacing: 8,        
+          mainAxisSpacing: 8,         
+          childAspectRatio: 0.65,     
+        ),
+        itemCount: _animeList.length + (_isLoading ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == _animeList.length) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.red),
+            );
+          }
+
+          final anime = _animeList[index];
+          final title = anime["title"]["english"] ?? anime["title"]["romaji"];
+          final imageUrl = anime["coverImage"]["large"];
+
+          return GestureDetector(
+            onTap: () {
+
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(imageUrl, fit: BoxFit.cover),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      color: Colors.black.withOpacity(0.6),
+                      padding: const EdgeInsets.all(4),
+                      child: Text(
+                        title ?? "Unknown",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.exo2(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+
       body: GridView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(8),
@@ -152,6 +208,7 @@ class _AnilistPageState extends State<AnilistPage> {
           );
         },
       ),
+
     );
   }
 }
