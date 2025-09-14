@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:soumi/nav_bar.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  // Load environment variables
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   runApp(const Soumi());
 }
 

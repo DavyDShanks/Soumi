@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:soumi/media_grid.dart';
 
 class AnilistPage extends StatefulWidget {
   const AnilistPage({super.key});
@@ -52,7 +54,7 @@ class _AnilistPageState extends State<AnilistPage> {
     ''';
 
     final response = await http.post(
-      Uri.parse("https://graphql.anilist.co"),
+      Uri.parse("${dotenv.env['ANILIST_API_BASE_URL']}"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "query": query,
@@ -60,9 +62,11 @@ class _AnilistPageState extends State<AnilistPage> {
       }),
     );
 
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final newAnime = data["data"]["Page"]["media"];
+      
 
       setState(() {
         _currentPage++;
@@ -101,59 +105,67 @@ class _AnilistPageState extends State<AnilistPage> {
           ),
         ],
       ),
-      
-      body: GridView.builder(
+      body: MediaGrid(
+        items: _animeList,
         controller: _scrollController,
-        padding: const EdgeInsets.all(8),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 6,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          childAspectRatio: 0.65,
-        ),
-        itemCount: _animeList.length + (_isLoading ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == _animeList.length) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.red),
-            );
-          }
-
-          final anime = _animeList[index];
-          final title = anime["title"]["english"] ?? anime["title"]["romaji"];
-          final imageUrl = anime["coverImage"]["large"];
-
-          return GestureDetector(
-            onTap: () {},
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(imageUrl, fit: BoxFit.cover),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      color: Colors.black.withOpacity(0.6),
-                      padding: const EdgeInsets.all(4),
-                      child: Text(
-                        title ?? "Unknown",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.exo2(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        isLoading: _isLoading,
+        getTitle: (anime) => anime["title"]["english"] ?? anime["title"]["romaji"] ?? "Unknown",
+        getImageUrl: (anime) => anime["coverImage"]["large"],
+        getBannerUrl: (anime) => anime["bannerImage"] ?? "", // Placeholder, implement if needed        
       ),
+
+      // body: GridView.builder(
+      //   controller: _scrollController,
+      //   padding: const EdgeInsets.all(8),
+      //   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      //     crossAxisCount: 6,
+      //     crossAxisSpacing: 8,
+      //     mainAxisSpacing: 8,
+      //     childAspectRatio: 0.65,
+      //   ),
+      //   itemCount: _animeList.length + (_isLoading ? 1 : 0),
+      //   itemBuilder: (context, index) {
+      //     if (index == _animeList.length) {
+      //       return const Center(
+      //         child: CircularProgressIndicator(color: Colors.red),
+      //       );
+      //     }
+
+      //     final anime = _animeList[index];
+      //     final title = anime["title"]["english"] ?? anime["title"]["romaji"];
+      //     final imageUrl = anime["coverImage"]["large"];
+
+      //     return GestureDetector(
+      //       onTap: () {},
+      //       child: ClipRRect(
+      //         borderRadius: BorderRadius.circular(10),
+      //         child: Stack(
+      //           fit: StackFit.expand,
+      //           children: [
+      //             Image.network(imageUrl, fit: BoxFit.cover),
+      //             Align(
+      //               alignment: Alignment.bottomCenter,
+      //               child: Container(
+      //                 color: Colors.black.withOpacity(0.6),
+      //                 padding: const EdgeInsets.all(4),
+      //                 child: Text(
+      //                   title ?? "Unknown",
+      //                   maxLines: 1,
+      //                   overflow: TextOverflow.ellipsis,
+      //                   style: GoogleFonts.exo2(
+      //                     color: Colors.white,
+      //                     fontSize: 12,
+      //                   ),
+      //                   textAlign: TextAlign.center,
+      //                 ),
+      //               ),
+      //             ),
+      //           ],
+      //         ),
+      //       ),
+      //     );
+      //   },
+      // ),
 
     );
   }
