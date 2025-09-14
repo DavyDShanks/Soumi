@@ -97,7 +97,9 @@ class _SearchPageState extends State<SearchPage> {
             _searchHistory.clear();
           });
         },
-        child: Icon(Icons.clear, color: Colors.black),
+        child: Icon(
+          Icons.clear,
+          color: Colors.black),
       ),
     );
   }

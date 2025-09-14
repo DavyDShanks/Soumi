@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
-
-// API Key in params : 8ff394ee978ea259ca1765a89b0479b9
-// API Key in header : eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZmYzOTRlZTk3OGVhMjU5Y2ExNzY1YTg5YjA0NzliOSIsIm5iZiI6MTc1Nzc0MDMwMi40ODcsInN1YiI6IjY4YzRmZDBlMGQ2NzE4Y2VlMjRjYTEzNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3aNdDc7rCd1lQ9LmwOh7jV7fxbcYeDazsucw99yReRk
 
 class SimklPage extends StatefulWidget {
   const SimklPage({super.key});
@@ -24,10 +22,9 @@ class _SimklPageState extends State<SimklPage> {
 
   Future<void> fetchTrending() async {
     final response = await http.get(
-      Uri.parse("https://api.themoviedb.org/3/trending/all/day"),
+      Uri.parse("${dotenv.env['TMDB_API_BASE_URL']}/trending/all/day"),
       headers: {
-        "Authorization":
-            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZmYzOTRlZTk3OGVhMjU5Y2ExNzY1YTg5YjA0NzliOSIsIm5iZiI6MTc1Nzc0MDMwMi40ODcsInN1YiI6IjY4YzRmZDBlMGQ2NzE4Y2VlMjRjYTEzNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3aNdDc7rCd1lQ9LmwOh7jV7fxbcYeDazsucw99yReRk",
+        "Authorization": "Bearer ${dotenv.env['TMDB_API_HEADER_KEY']}",
       },
     );
 
