@@ -48,6 +48,7 @@ class _AnilistPageState extends State<AnilistPage> {
             coverImage {
               large
             }
+            bannerImage
           }
         }
       }

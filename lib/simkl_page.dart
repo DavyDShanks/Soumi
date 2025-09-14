@@ -98,13 +98,13 @@ class _SimklPageState extends State<SimklPage> {
         getImageUrl: (movie) {
           final posterPath = movie["poster_path"];
           return posterPath != null
-            ? "${dotenv.env['TMDB_IMAGE_BASE_URL']}/w500$posterPath"
+            ? "${dotenv.env['TMDB_IMAGE_BASE_URL']}/w500$posterPath" // available widths: w92, w154, w185, w342, w500, w780, original
             : "https://via.placeholder.com/200x300?text=No+Image";
         },
         getBannerUrl: (movie) {
           final backdropPath = movie["backdrop_path"];
           return backdropPath != null
-            ? "${dotenv.env['TMDB_IMAGE_BASE_URL']}/original$backdropPath"
+            ? "${dotenv.env['TMDB_IMAGE_BASE_URL']}/w1280$backdropPath" // available widths: w300, w780, w1280, original
             : "https://via.placeholder.com/500x281?text=No+Image";
         },
       ),
