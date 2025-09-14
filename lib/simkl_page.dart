@@ -110,7 +110,7 @@ class _SimklPageState extends State<SimklPage> {
           final posterPath = movie["poster_path"];
           final title = movie["title"] ?? movie["name"];
           final imageUrl = posterPath != null
-              ? "https://image.tmdb.org/t/p/w200$posterPath"
+              ? "https://image.tmdb.org/t/p/w500$posterPath"
               : "https://via.placeholder.com/200x300?text=No+Image";
 
           return GestureDetector(
