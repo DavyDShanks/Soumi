@@ -21,9 +21,10 @@ class MediaDetailsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        leading: BackButton(color: Colors.white),
         title: Text(
           getTitle(item),
-          style: GoogleFonts.poppins(),
+          style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.black,
       ),
@@ -31,24 +32,22 @@ class MediaDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              height: 500,
+            Image.network(
+              getBannerUrl(item),
+              fit: BoxFit.cover,
               width: double.infinity,
-              child: Image.network(
-                getBannerUrl(item),
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey,
-                    child: Center(
-                      child: Text(
-                        "No Banner Available",
-                        style: GoogleFonts.poppins(color: Colors.white),
-                      ),
+              height: 400,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey,
+                  child: Center(
+                    child: Text(
+                      "No Banner Available",
+                      style: GoogleFonts.poppins(color: Colors.white),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
             SizedBox(
                 height: 300,
