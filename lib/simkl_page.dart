@@ -12,42 +12,73 @@ class SimklPage extends StatefulWidget {
 }
 
 class _SimklPageState extends State<SimklPage> {
-  List trending = [];
+
+  List<dynamic> trending = [];
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoading = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
+
 
   @override
   void initState() {
     super.initState();
     fetchTrending();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent &&
+          !_isLoading &&
+          _hasMore) {
+        fetchTrending();
+      }
+    });
   }
 
   Future<void> fetchTrending() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     final response = await http.get(
-      Uri.parse("${dotenv.env['TMDB_API_BASE_URL']}/trending/all/day"),
+      Uri.parse(
+        "https://api.themoviedb.org/3/trending/movie/day?page=$_currentPage",
+      ),
       headers: {
-        "Authorization": "Bearer ${dotenv.env['TMDB_API_HEADER_KEY']}",
+        "Authorization":
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4ZmYzOTRlZTk3OGVhMjU5Y2ExNzY1YTg5YjA0NzliOSIsIm5iZiI6MTc1Nzc0MDMwMi40ODcsInN1YiI6IjY4YzRmZDBlMGQ2NzE4Y2VlMjRjYTEzNyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.3aNdDc7rCd1lQ9LmwOh7jV7fxbcYeDazsucw99yReRk",
+
       },
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+      final results = data["results"] as List;
+
       setState(() {
-        trending = data["results"];
+        trending.addAll(results);
+        _currentPage++;
+        _hasMore = results.isNotEmpty;
       });
     } else {
       throw Exception("Failed to load trending");
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Image.asset(
-          "assets/simkl_logo.png",
-          color: Colors.white,
-          height: 25,
+        leading: Image.asset("assets/simkl_logo.png", color: Colors.white),
+        backgroundColor: Colors.transparent,
+        elevation: 5,
+        title: Center(
+          child: Text("Movies", style: GoogleFonts.exo2(color: Colors.white)),
         ),
-        backgroundColor: Colors.black,
         actions: [
           IconButton(
             onPressed: () {},
@@ -58,81 +89,61 @@ class _SimklPageState extends State<SimklPage> {
           ),
         ],
       ),
-      backgroundColor: Colors.black,
-      body: trending.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(8),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 6,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 0.65,
+        ),
+        itemCount: trending.length + (_isLoading ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == trending.length) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.red),
+            );
+          }
+
+          final movie = trending[index];
+          final posterPath = movie["poster_path"];
+          final title = movie["title"] ?? movie["name"];
+          final imageUrl = posterPath != null
+              ? "https://image.tmdb.org/t/p/w200$posterPath"
+              : "https://via.placeholder.com/200x300?text=No+Image";
+
+          return GestureDetector(
+            onTap: () {},
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Text(
-                    "Trending",
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 200,
-                    child: ListView.separated(
-                      separatorBuilder: (context, index) => const SizedBox(width: 10),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: trending.length,
-                      itemBuilder: (context, index) {
-                        final item = trending[index];
-                        final posterPath = item["poster_path"];
-                        return InkWell(
-                          onTap: () {
-                            print(
-                              "Clicked on ${item["title"] ?? item["name"] ?? "Unknown"}",
-                            );
-                          },
-                          child: Container(
-                            width: 120,
-                            margin: const EdgeInsets.only(right: 10),
-                            child: Column(
-                              children: [
-                                posterPath != null
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          "https://image.tmdb.org/t/p/w200$posterPath",
-                                          fit: BoxFit.cover,
-                                          height: 160,
-                                        ),
-                                      )
-                                    : Container(
-                                        height: 160,
-                                        color: Colors.grey,
-                                        child: const Center(
-                                          child: Icon(
-                                            Icons.movie,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  item["title"] ?? item["name"] ?? "Unknown",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                  Image.network(imageUrl, fit: BoxFit.cover),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      color: Colors.black.withOpacity(0.6),
+                      padding: const EdgeInsets.all(4),
+                      child: Text(
+                        title ?? "Unknown",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.exo2(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+          );
+        },
+      ),
     );
   }
 }
